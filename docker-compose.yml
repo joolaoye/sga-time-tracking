@@ -1,0 +1,102 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: sga-time-tracking-db
+    environment:
+      POSTGRES_DB: sga_time_tracking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sga-time-tracking-network
+
+  # Django API Backend
+  api:
+    build:
+      context: ./apps/api
+      target: development
+    container_name: sga-time-tracking-api
+    environment:
+      - DJANGO_ENV=development
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-dev-secret-key-change-in-production}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-True}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,api}
+      - DB_NAME=${DB_NAME:-sga_time_tracking}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
+      - SESSION_COOKIE_AGE=${SESSION_COOKIE_AGE:-3600}
+      - SESSION_EXPIRE_AT_BROWSER_CLOSE=${SESSION_EXPIRE_AT_BROWSER_CLOSE:-True}
+      - HUB_ABSOLUTE_SESSION_AGE=${HUB_ABSOLUTE_SESSION_AGE:-43200}
+    volumes:
+      - ./apps/api:/app
+      - /app/__pycache__
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sga-time-tracking-network
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Clock Kiosk (Next.js) - Using node image directly for dev
+  clock-kiosk:
+    image: node:20-alpine
+    container_name: sga-time-tracking-clock-kiosk
+    working_dir: /workspace
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+      - /workspace/apps/clock-kiosk/node_modules
+      - /workspace/apps/clock-kiosk/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - sga-time-tracking-network
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && cd /workspace && pnpm install && pnpm build:packages && cd apps/clock-kiosk && pnpm dev"
+
+  # Members Hub (Next.js) - Using node image directly for dev
+  members-hub:
+    image: node:20-alpine
+    container_name: sga-time-tracking-members-hub
+    working_dir: /workspace
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+      - /workspace/apps/members-hub/node_modules
+      - /workspace/apps/members-hub/.next
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+    networks:
+      - sga-time-tracking-network
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && cd /workspace && pnpm install && pnpm build:packages && cd apps/members-hub && npx next dev --turbopack --port 3001"
+
+volumes:
+  postgres_data:
+
+networks:
+  sga-time-tracking-network:
+    driver: bridge

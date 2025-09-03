@@ -1,0 +1,43 @@
+{
+  "name": "@sga-time-tracking/root",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "docker:start:mac": "open -a Docker || true",
+    "docker:start:linux": "systemctl --user start docker || sudo systemctl start docker",
+    "docker:start:win": "powershell -ExecutionPolicy Bypass -Command \"Start-Process -FilePath '$Env:ProgramFiles\\Docker\\Docker\\Docker Desktop.exe'\"",
+    "bootstrap": "pnpm install && pnpm build:packages && docker compose up -d db && sleep 5 && docker compose run --rm api python manage.py migrate",
+    "build:packages": "turbo build --filter=@workspace/ui",
+    "dev": "docker compose up",
+    "dev:detached": "docker compose up -d",
+    "dev:rebuild": "docker compose up --build",
+    "cleanup": "docker compose down",
+    "cleanup:volumes": "docker compose down -v",
+    "restart": "docker compose restart",
+    "logs": "docker compose logs -f",
+    "db:migrate": "docker compose run --rm api python manage.py migrate",
+    "db:makemigrations": "docker compose run --rm api python manage.py makemigrations",
+    "db:shell": "docker compose exec db psql -U postgres -d sga_time_tracking",
+    "db:reset": "docker compose down -v && docker compose up -d db && sleep 5 && docker compose run --rm api python manage.py migrate",
+    "api:shell": "docker compose exec api python manage.py shell",
+    "api:createsuperuser": "docker compose exec api python manage.py createsuperuser",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "prettier": "^3.5.1",
+    "turbo": "^2.4.2",
+    "typescript": "5.7.3"
+  },
+  "packageManager": "pnpm@10.4.1",
+  "engines": {
+    "node": ">=20"
+  }
+}
