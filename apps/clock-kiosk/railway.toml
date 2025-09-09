@@ -1,10 +1,13 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+builder = "NIXPACKS"
+buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm --filter @sga-time-tracking/clock-kiosk... build"
 
 [deploy]
-startCommand = "node server.js"
+startCommand = "pnpm --filter @sga-time-tracking/clock-kiosk... start"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+[environments.production]
+variables = { NODE_ENV = "production" }
