@@ -10,7 +10,7 @@
     "docker:start:mac": "open -a Docker || true",
     "docker:start:linux": "systemctl --user start docker || sudo systemctl start docker",
     "docker:start:win": "powershell -ExecutionPolicy Bypass -Command \"Start-Process -FilePath '$Env:ProgramFiles\\Docker\\Docker\\Docker Desktop.exe'\"",
-    "bootstrap": "pnpm install && pnpm build:packages && docker compose up -d db && sleep 5 && docker compose run --rm api python manage.py migrate",
+    "bootstrap": "pnpm install && pnpm build:packages && docker compose up -d db && sleep 5 && docker compose run --rm api python manage.py migrate && docker compose run --rm api python manage.py seed_dev_data",
     "build:packages": "turbo build --filter=@workspace/ui",
     "dev": "docker compose up",
     "dev:detached": "docker compose up -d",
@@ -25,6 +25,8 @@
     "db:reset": "docker compose down -v && docker compose up -d db && sleep 5 && docker compose run --rm api python manage.py migrate",
     "api:shell": "docker compose exec api python manage.py shell",
     "api:createsuperuser": "docker compose exec api python manage.py createsuperuser",
+    "api:create-admin": "docker compose exec api python manage.py create_admin_user",
+    "api:seed-dev": "docker compose exec api python manage.py seed_dev_data",
     "build": "turbo build",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""

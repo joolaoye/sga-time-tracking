@@ -17,11 +17,14 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements/ requirements/
+RUN pip install --no-cache-dir -r requirements/base.txt
 
 # Development stage
 FROM base as development
+
+# Install development dependencies
+RUN pip install --no-cache-dir -r requirements/development.txt
 
 # Copy project
 COPY . .
@@ -39,11 +42,21 @@ CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 # Production stage (for future use)
 FROM base as production
 
+# Install production dependencies
+RUN pip install --no-cache-dir -r requirements/production.txt
+
 # Copy project
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Set production environment
+ENV DJANGO_ENV=production
+
+# Create static and media directories
+RUN mkdir -p /app/staticfiles /app/media
+
+# Collect static files (with minimal settings for collectstatic)
+ENV DJANGO_SECRET_KEY=temp-key-for-collectstatic
+RUN python manage.py collectstatic --noinput --clear
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
@@ -52,5 +65,5 @@ USER app
 # Expose port
 EXPOSE 8000
 
-# Production command
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "time_tracking_backend.wsgi:application"]
+# Production command (Railway will provide PORT environment variable)
+CMD sh -c "gunicorn --bind 0.0.0.0:${PORT:-8000} time_tracking_backend.wsgi:application"

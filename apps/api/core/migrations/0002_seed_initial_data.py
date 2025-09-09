@@ -4,65 +4,22 @@ from django.db import migrations
 
 
 def create_initial_data(apps, schema_editor):
-    """Create initial development data"""
-    User = apps.get_model('core', 'User')
-    Committee = apps.get_model('core', 'Committee')
-    UserCommittee = apps.get_model('core', 'UserCommittee')
-    AllowedIP = apps.get_model('core', 'AllowedIP')
-    
-    # Create users with access codes
-    alice = User.objects.create(
-        full_name='Alice Johnson',
-        access_code='123456',
-        role='admin',
-        target_hours_per_week=5
-    )
-    
-    bob = User.objects.create(
-        full_name='Bob Smith',
-        access_code='234567',
-        role='chair',
-        target_hours_per_week=10
-    )
-    
-    carol = User.objects.create(
-        full_name='Carol Lee',
-        access_code='345678',
-        role='member',
-        target_hours_per_week=8
-    )
-
-    # Create committee with Bob as chair
-    tech_committee = Committee.objects.create(
-        name='Technology Fee Committee',
-        chair=bob
-    )
-
-    # Assign members to committee
-    UserCommittee.objects.create(user=bob, committee=tech_committee)
-    UserCommittee.objects.create(user=carol, committee=tech_committee)
-
-    # Create allowlist entries for IP addresses
-    
-    AllowedIP.objects.create(
-        ip_address='172.19.0.1',
-        label='Docker Gateway (Development)',
-        created_by=alice
-    )
+    """
+    This migration was originally used for development seed data.
+    For production deployments, use the management command:
+    python manage.py create_admin_user
+    """
+    # No-op for production - data seeding moved to management commands
+    pass
 
 
 def reverse_initial_data(apps, schema_editor):
-    """Remove initial development data"""
-    User = apps.get_model('core', 'User')
-    Committee = apps.get_model('core', 'Committee')
-    UserCommittee = apps.get_model('core', 'UserCommittee')
-    AllowedIP = apps.get_model('core', 'AllowedIP')
-    
-    # Delete in reverse order to respect foreign key constraints
-    UserCommittee.objects.all().delete()
-    Committee.objects.all().delete()
-    AllowedIP.objects.all().delete()
-    User.objects.all().delete()
+    """
+    Reverse function for the migration.
+    Since we no longer seed data in migrations, this is a no-op.
+    """
+    # No-op for production - data seeding moved to management commands
+    pass
 
 
 class Migration(migrations.Migration):
