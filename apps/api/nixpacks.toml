@@ -1,12 +1,9 @@
 providers = ["python"]
 
-[variables]
-NIXPACKS_PYTHON_VERSION = "3.12"
-
 [phases.setup]
-nixPkgs = ["python312", "python312Packages.pip", "postgresql_16.dev", "gcc"]
+nixPkgs = ["python311", "pip"]
 
 [phases.install]
 cmds = [
-  "/opt/venv/bin/pip install -r requirements/production.txt"
+  "pip install -r requirements/production.txt"
 ]
