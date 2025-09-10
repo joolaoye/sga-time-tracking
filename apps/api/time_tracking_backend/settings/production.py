@@ -72,14 +72,16 @@ frontend_urls_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
 if frontend_urls_env:
     CORS_ALLOWED_ORIGINS = [url.strip() for url in frontend_urls_env.split(',') if url.strip()]
 
-# Add Railway frontend domains if available
-clock_kiosk_url = os.getenv('CLOCK_KIOSK_URL')
-members_hub_url = os.getenv('MEMBERS_HUB_URL')
 
-if clock_kiosk_url:
-    CORS_ALLOWED_ORIGINS.append(clock_kiosk_url)
-if members_hub_url:
-    CORS_ALLOWED_ORIGINS.append(members_hub_url)
+# Fallback: If no CORS origins are configured, allow the known Railway domains
+if not CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        'https://clock-kiosk-production.up.railway.app',
+        'https://members-hub-production.up.railway.app'
+    ]
+    logger.warning(f"No CORS origins found in env vars, using fallback: {CORS_ALLOWED_ORIGINS}")
+else:
+    logger.info(f"Using CORS origins from environment: {CORS_ALLOWED_ORIGINS}")
 
 # Session security for production
 SESSION_COOKIE_SECURE = True
