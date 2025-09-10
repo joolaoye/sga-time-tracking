@@ -67,11 +67,14 @@ WHITENOISE_AUTOREFRESH = False
 # Production CORS settings
 CORS_ALLOWED_ORIGINS = []
 
+# Debug logging for CORS configuration
+import logging
+logger = logging.getLogger(__name__)
+
 # Parse production frontend URLs from environment
 frontend_urls_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
 if frontend_urls_env:
     CORS_ALLOWED_ORIGINS = [url.strip() for url in frontend_urls_env.split(',') if url.strip()]
-
 
 # Fallback: If no CORS origins are configured, allow the known Railway domains
 if not CORS_ALLOWED_ORIGINS:
