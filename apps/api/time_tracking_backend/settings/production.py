@@ -9,6 +9,10 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+SECURE_REDIRECT_EXEMPT = [r"^health/?$"]
+
 # Allowed hosts - Railway and custom domains
 ALLOWED_HOSTS = []
 
