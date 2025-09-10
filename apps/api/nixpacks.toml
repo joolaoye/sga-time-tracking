@@ -4,4 +4,4 @@ providers = ["python"]
 NIXPACKS_PYTHON_VERSION = "3.12"
 
 [phases.setup]
-nixPkgs = ["postgresql_16.dev", "gcc"]
+nixPkgs = ["python312Full", "postgresql_16.dev", "gcc"]
