@@ -8,7 +8,6 @@ nixPkgs = ["python312", "python312Packages.pip", "postgresql_16.dev", "gcc"]
 
 [phases.install]
 cmds = [
-  "python -m ensurepip --upgrade || true",
   "python -m pip install --upgrade pip setuptools wheel",
   "python -m pip install -r requirements/production.txt"
 ]
