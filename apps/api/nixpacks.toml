@@ -8,5 +8,5 @@ nixPkgs = ["python312", "python312Packages.pip", "postgresql_16.dev", "gcc"]
 
 [phases.install]
 cmds = [
-  "pip install -r requirements/production.txt"
+  "/opt/venv/bin/pip install -r requirements/production.txt"
 ]
