@@ -26,6 +26,9 @@ railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN')
 if railway_domain:
     ALLOWED_HOSTS.append(railway_domain)
 
+# Railway health check domain
+ALLOWED_HOSTS.append('healthcheck.railway.app')
+
 # Fallback if no hosts specified
 if not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ['*']  # Not recommended, but prevents deployment failures
